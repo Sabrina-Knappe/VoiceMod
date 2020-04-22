@@ -8,6 +8,6 @@ val = mX(ploc); % magnitude of peak bin
 lval = mX(ploc-1); % magnitude of bin at left
 rval= mX(ploc+1); % magnitude of bin at right
 iploc = ploc + .5*(lval-rval)./(lval-2*val+rval); % center of parabola
-disp(iploc);
+%disp(iploc);
 ipmag = val-.25*(lval-rval).*(iploc-ploc); % magnitude of peaks
 ipphase = interp1(1:length(pX),pX,iploc,'linear'); % phase of peaks

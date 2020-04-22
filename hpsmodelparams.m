@@ -1,4 +1,4 @@
-function [y,yh,ys] = hpsmodelparams(x,fs,w,N,t,nH,minf0,maxf0,f0et,maxhd,stocf,timemapping)
+function [y,yh,ys] = hpsmodelparams(x,fs,w,N,t,nH,minf0,maxf0,f0et,maxhd,stocf,timemapping, fscale, timbremapping)
 % Authors: J. Bonada, X. Serra, X. Amatriain, A. Loscos
 % Analysis/synthesis of a sound using the sinusoidal harmonic model
 % x: input sound, fs: sampling rate, w: analysis window (odd size),
@@ -12,7 +12,7 @@ function [y,yh,ys] = hpsmodelparams(x,fs,w,N,t,nH,minf0,maxf0,f0et,maxhd,stocf,t
 % y: output sound, yh: harmonic component, ys: stochastic component
 if length(timemapping)==0 % argument not specified
     timemapping =[ 0 length(x)/fs; % input time
-        0 length(x)/fs ]; % output time
+                        0 length(x)/fs ]; % output time
 end
 M = length(w); % analysis window size
 Ns = 1024; % FFT size for synthesis
@@ -40,7 +40,10 @@ poutend = outsoundlength-max(hM,H); % last sample to start a frame
 pout = 1+max(hNs,hM); % initialize sound pointer to middle of analysis window
 minpin = 1+max(hNs,hM);
 maxpin = min(length(x)-max(hNs,hM)-1);
+i=0;
 while pout<poutend
+    i=i+1;
+    %disp(i);
     pin = round( interp1(timemapping(2,:),timemapping(1,:),pout/fs, 'linear', 'extrap') * fs );
     pin = max(minpin,pin);
     pin = min(maxpin,pin);
@@ -50,14 +53,15 @@ while pout<poutend
     fftbuffer(1:(M+1)/2) = xw((M+1)/2:M); % zero-phase window in fftbuffer
     fftbuffer(N-(M-1)/2+1:N) = xw(1:(M-1)/2);
     X = fft(fftbuffer); % compute the FFT
+    %disp(X);
     mX = 20*log10(abs(X(1:N2))); % magnitude spectrum
-    %disp(mX);
+    %disp(mX(2:N2-1));
     pX = unwrap(angle(X(1:N/2+1))); % unwrapped phase spectrum
     %disp(pX);
     ploc = 1 + find((mX(2:N2-1)>t) .* (mX(2:N2-1)>mX(3:N2)) .* (mX(2:N2-1)>mX(1:N2-2))); % find peaks
-    disp(ploc);
+    %disp(ploc);
     [ploc,pmag,pphase] = peakinterp(mX,pX,ploc); % refine peak values
-    disp(ploc);
+    %disp(ploc);
     yinws = round(fs*0.0125); % using approx. a 12.5 ms window for yin
     yinws = yinws+mod(yinws,2); % make it even
     yb = pin-yinws/2;
@@ -73,6 +77,7 @@ while pout<poutend
     hf = (f0>0).*(f0.*(1:nH)); % initialize harmonic frequencies
     hi = 1; % initialize harmonic index
     npeaks = length(ploc); % number of peaks found
+    %disp(npeaks);
     while (f0>0 && hi<=nH && hf(hi)<fs/2) % find harmonic peaks
         [dev,pei] = min(abs((ploc(1:npeaks)-1)/N*fs-hf(hi))); % closest peak
         if ((hi==1 || ~any(hloc(1:hi-1)==ploc(pei))) && dev<maxhd*hf(hi))

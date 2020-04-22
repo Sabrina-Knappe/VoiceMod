@@ -4,11 +4,12 @@ n1 = 441; % analysis step [samples]
 n2 = n1; % synthesis step [samples]
 s_win = 1023; % analysis window length [samples]
 [x,fs] = audioread('426810__pax11__psalm10.wav');
+x = x(:,1);
 %----- initialize windows, arrays, etc -----
 w1 = hann(s_win, 'periodic'); % analysis window
 w2 = w1; % synthesis window
 L = length(x);
-DAFx_in = [zeros(s_win, 2); x; zeros(s_win-mod(L,n1),2)] / max(abs(x));
+DAFx_in = [zeros(s_win, 1); x; zeros(s_win-mod(L,n1),1)] / max(abs(x));
 DAFx_out = zeros(length(x),1);
 soundlength= length(x);
 %-----time mapping-----%
@@ -30,3 +31,7 @@ f0et= 5;
 maxhd= 2;
 stocf= 1;
 [y, yh, ys]= hpsmodelparams(x, fs, w, N, t, nH, minf0, maxf0, f0et, maxhd, stocf, timemapping);
+%sound(y, fs);
+audiowrite('outputTimbre.wav', y, fs);
+[y, yh, ys]= hpsmodelrough(x, fs, w, N, t, nH, minf0, maxf0, f0et, maxhd, stocf, timemapping);
+audiowrite('outputrough.wav', y, fs);

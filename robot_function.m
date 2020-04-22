@@ -12,7 +12,7 @@ s_win = 1024; % analysis window length [samples]
 w1 = hann(s_win, 'periodic'); % analysis window
 w2 = w1; % synthesis window
 L = length(DAFx_in);
-DAFx_in = [zeros(s_win, 2); DAFx_in; zeros(s_win-mod(L,n1),2)] / max(abs(DAFx_in));
+DAFx_in = [zeros(s_win, 1); DAFx_in; zeros(s_win-mod(L,n1),1)] / max(abs(DAFx_in));
 DAFx_out = zeros(length(DAFx_in),1);
 tic
 %UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
